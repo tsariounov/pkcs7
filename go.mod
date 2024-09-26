@@ -1,3 +1,3 @@
-module go.mozilla.org/pkcs7
+module faisal-memon/pkcs7
 
-go 1.11
+go 1.21
