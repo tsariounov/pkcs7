@@ -120,22 +120,24 @@ func verifySignature(p7 *PKCS7, signer signerInfo, truststore *x509.CertPool) (e
 	signingTime := time.Now().UTC()
 	if len(signer.AuthenticatedAttributes) > 0 {
 		// TODO(fullsailor): First check the content type match
-		var digest []byte
-		err := unmarshalAttribute(signer.AuthenticatedAttributes, OIDAttributeMessageDigest, &digest)
-		if err != nil {
-			return err
-		}
-		hash, err := getHashForOID(signer.DigestAlgorithm.Algorithm)
-		if err != nil {
-			return err
-		}
-		h := hash.New()
-		h.Write(p7.Content)
-		computed := h.Sum(nil)
-		if subtle.ConstantTimeCompare(digest, computed) != 1 {
-			return &MessageDigestMismatchError{
-				ExpectedDigest: digest,
-				ActualDigest:   computed,
+		if len(p7.Content) != 0 {
+			var digest []byte
+			err := unmarshalAttribute(signer.AuthenticatedAttributes, OIDAttributeMessageDigest, &digest)
+			if err != nil {
+				return err
+			}
+			hash, err := getHashForOID(signer.DigestAlgorithm.Algorithm)
+			if err != nil {
+				return err
+			}
+			h := hash.New()
+			h.Write(p7.Content)
+			computed := h.Sum(nil)
+			if subtle.ConstantTimeCompare(digest, computed) != 1 {
+				return &MessageDigestMismatchError{
+					ExpectedDigest: digest,
+					ActualDigest:   computed,
+				}
 			}
 		}
 		signedData, err = marshalAttributes(signer.AuthenticatedAttributes)
