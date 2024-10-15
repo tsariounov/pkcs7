@@ -1,3 +1,3 @@
-module github.com/faisal-memon/pkcs7
+module github.com/tsariounov/pkcs7
 
 go 1.21
